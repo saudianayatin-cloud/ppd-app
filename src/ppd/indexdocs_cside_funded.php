@@ -230,7 +230,7 @@ session_start();
                             <label class="required">Proponent:</label>
                             <textarea class="form-control" name="proponent" rows="1"></textarea>
                         </div>
-<!-- 
+                        <!-- 
                         <div class="form-group" hidden>
                             <label class="required">Status:</label>
                             <textarea class="form-control" name="status" rows="2"></textarea>
@@ -425,7 +425,7 @@ session_start();
                                     $("#uploadStatsAdd").text("0 MB / 0 MB • ETA: --");
                                 });
                             }, 450);
-                            
+
 
                             setTimeout(() => {
                                 // msgBox.fadeOut();
@@ -650,7 +650,8 @@ session_start();
                                 <option value="RegularInfra">RegularInfra</option>
                                 <option value="TDIF">TDIF</option>
                                 <option value="SDF">SDF</option>
-                                <option value="CONTINGENCY FUND">CONTINGENCY FUND</option>
+                                <option value="Contingency Fund">CONTINGENCY FUND</option>
+                                <option value="Supplemental Fund">SUPPLEMENTAL FUND</option>
                                 <option value="OPPAP">OPPAP</option>
                                 <option value="DA-FMR">DA-FMR</option>
                                 <option value="PAMANA-DILG">PAMANA-DILG</option>
@@ -726,15 +727,6 @@ session_start();
                             <button type="button" class="btn btn-warning btn-sm" id="cancelUploadBtn">
                                 ✖ Cancel Upload
                             </button>
-                        </div>
-
-
-                        <!-- Progress Bar -->
-                        <div class="position-relative mt-2" style="display: none;" id="uploadProgressContainer">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%;" id="uploadProgressBar"></div>
-                            </div>
-                            <div id="uploadPercentText">0%</div>
                         </div>
 
                     </div>
@@ -1003,7 +995,12 @@ session_start();
             document.getElementById('barangay').value = rowData.barangay || '';
             document.getElementById('sitio').value = rowData.sitio || '';
             document.getElementById('cy').value = rowData.cy || '';
-            document.getElementById('fund_source').value = rowData.fund_source || '';
+            const fundSourceSelect = document.getElementById('fund_source');
+            const fundSourceValue = normalizeFundSource(rowData.fund_source || '');
+            if (fundSourceValue && ![...fundSourceSelect.options].some(option => option.value === fundSourceValue)) {
+                fundSourceSelect.add(new Option(fundSourceValue, fundSourceValue));
+            }
+            fundSourceSelect.value = fundSourceValue;
             document.getElementById('moi').value = rowData.moi || '';
             document.getElementById('proj_target').value = rowData.proj_target || '';
             document.getElementById('proj_plan').value = rowData.proj_plan || '';
@@ -1022,6 +1019,15 @@ session_start();
             }
 
             $('#edit_modal').modal('show');
+        }
+
+        function normalizeFundSource(value) {
+            const normalizedValue = String(value || '').trim();
+            const fundSourceMap = {
+                'CONTINGENCY FUND': 'Contingency Fund'
+            };
+
+            return fundSourceMap[normalizedValue.toUpperCase()] || normalizedValue;
         }
     </script>
 
@@ -1226,8 +1232,6 @@ session_start();
 
     <!-- Scripts -->
     <script>
-
-        
         $(document).ready(function() {
             // Initialize DataTable
             const table = $('#your-table').DataTable({

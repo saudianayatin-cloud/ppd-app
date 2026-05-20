@@ -17,7 +17,11 @@ $municipality = mysqli_real_escape_string($conn, $_POST['municipality']);
 $barangay = mysqli_real_escape_string($conn, $_POST['barangay']);
 $sitio = mysqli_real_escape_string($conn, $_POST['sitio']);
 $cy = mysqli_real_escape_string($conn, $_POST['cy']);
-$fund_source = mysqli_real_escape_string($conn, $_POST['fund_source']);
+$fund_source_raw = trim($_POST['fund_source'] ?? '');
+if (strtoupper($fund_source_raw) === 'CONTINGENCY FUND') {
+    $fund_source_raw = 'Contingency Fund';
+}
+$fund_source = mysqli_real_escape_string($conn, $fund_source_raw);
 $moi = mysqli_real_escape_string($conn, $_POST['moi']);
 $proj_target = mysqli_real_escape_string($conn, $_POST['proj_target']);
 $proj_plan = mysqli_real_escape_string($conn, $_POST['proj_plan']);
