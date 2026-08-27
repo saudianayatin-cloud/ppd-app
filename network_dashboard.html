@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PPD Network Monitoring</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3f7;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #607080;
+      --line: #d8e1e8;
+      --blue: #1f6feb;
+      --green: #16833a;
+      --red: #c62828;
+      --amber: #a85d00;
+      --focus: #8ab4f8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .shell {
+      width: min(1280px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .timestamp {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .metric,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(20, 30, 40, 0.05);
+    }
+
+    .metric {
+      padding: 16px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(640px, 1.1fr);
+      gap: 12px;
+    }
+
+    .device-column {
+      display: grid;
+      gap: 12px;
+    }
+
+    .device-status-panel {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      margin: 0;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 16px;
+    }
+
+    .panel-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title-row h2 {
+      padding: 0;
+      border-bottom: 0;
+    }
+
+    .device-count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 310px;
+      padding: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    #deviceWrap th,
+    #deviceWrap td {
+      text-align: center;
+    }
+
+    #deviceWrap th:first-child,
+    #deviceWrap td:first-child {
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-width: 70px;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .online {
+      background: #e5f5ea;
+      color: var(--green);
+    }
+
+    .offline {
+      background: #fdeaea;
+      color: var(--red);
+    }
+
+    .pending {
+      background: #fff4df;
+      color: var(--amber);
+    }
+
+    .empty {
+      padding: 18px 16px;
+      color: var(--muted);
+    }
+
+    .error {
+      color: var(--red);
+    }
+
+    .device-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 14px 16px 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+
+    .table-toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      align-items: end;
+    }
+
+    .table-toolbar-left,
+    .table-toolbar-right {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .table-toolbar-right {
+      justify-content: flex-end;
+    }
+
+    .inline-field {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .inline-field label {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 400;
+      text-transform: none;
+    }
+
+    .inline-field input,
+    .inline-field select {
+      width: auto;
+      min-height: 34px;
+      padding: 6px 8px;
+    }
+
+    .inline-field input {
+      width: 190px;
+    }
+
+    .inline-field select {
+      min-width: 82px;
+    }
+
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pagination {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-button {
+      min-height: 30px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 13px;
+      padding: 4px 10px;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      grid-column: 1 / -1;
+    }
+
+    button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--blue);
+      color: #ffffff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      padding: 8px 14px;
+      white-space: nowrap;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .scan-button {
+      min-height: 34px;
+      padding: 6px 12px;
+    }
+
+    .form-message {
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 18px;
+      text-align: right;
+    }
+
+    .form-message.success {
+      color: var(--green);
+    }
+
+    .row-actions {
+      display: inline-flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-button {
+      min-height: 28px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    .action-button.delete {
+      color: var(--red);
+    }
+
+    .secondary-button {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    @media (max-width: 820px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .timestamp {
+        text-align: left;
+      }
+
+      .header-actions {
+        align-items: flex-start;
+        flex-direction: column-reverse;
+      }
+
+      .metrics,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .device-form {
+        grid-template-columns: 1fr;
+      }
+
+      .table-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .table-toolbar-right {
+        justify-content: flex-start;
+      }
+
+      .table-footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .form-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+      }
+
+      .form-message {
+        text-align: left;
+      }
+
+      table {
+        min-width: 860px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>PPD Network Monitoring</h1>
+      </div>
+      <div class="header-actions">
+        <button id="scanNowButton" class="scan-button" type="button">Scan Now</button>
+        <div class="timestamp">
+          <div id="updatedAt">Waiting for data</div>
+          <div id="refreshStatus">Auto refresh: 5 seconds</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="metrics" aria-label="Speed and device summary">
+      <div class="metric">
+        <span>Download</span>
+        <strong><span id="download">0.00</span> Mbps</strong>
+      </div>
+      <div class="metric">
+        <span>Upload</span>
+        <strong><span id="upload">0.00</span> Mbps</strong>
+      </div>
+      <div class="metric">
+        <span>Ping</span>
+        <strong><span id="ping">0.00</span> ms</strong>
+      </div>
+      <div class="metric">
+        <span>Devices</span>
+        <strong><span id="online">0</span>/<span id="total">0</span> Online</strong>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Speed History</h2>
+        <canvas id="speedChart" width="760" height="310"></canvas>
+      </div>
+
+      <div class="device-column">
+        <div class="panel">
+          <h2>Add Device</h2>
+          <form id="deviceForm" class="device-form">
+            <div class="field">
+              <label for="deviceName">Device Name</label>
+              <input id="deviceName" name="deviceName" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="ipAddress">IP Address</label>
+              <input id="ipAddress" name="ipAddress" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1" required>
+            </div>
+            <div class="field">
+              <label for="deviceType">Type</label>
+              <select id="deviceType" name="deviceType">
+                <option value="PC">PC</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Printer">Printer</option>
+                <option value="Router">Router</option>
+                <option value="Access Point">Access Point</option>
+                <option value="Camera">Camera</option>
+                <option value="Phone">Phone</option>
+                <option value="Server">Server</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="notes">Notes</label>
+              <input id="notes" name="notes" autocomplete="off">
+            </div>
+            <div class="form-actions">
+              <button id="addDeviceButton" type="submit">Add Device</button>
+              <button id="cancelEditButton" class="secondary-button" type="button" hidden>Cancel</button>
+              <div id="formMessage" class="form-message" aria-live="polite"></div>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="panel device-status-panel">
+        <div class="panel-title-row">
+          <h2>Device Status</h2>
+          <span id="deviceCount" class="device-count">0 devices</span>
+        </div>
+        <div class="table-toolbar">
+          <div class="table-toolbar-left">
+            <span class="inline-field">
+              <label for="statusFilter">Filter by Status:</label>
+              <select id="statusFilter">
+                <option value="">All</option>
+                <option value="online">Online</option>
+                <option value="offline">Offline</option>
+                <option value="pending">Pending</option>
+              </select>
+            </span>
+            <span class="inline-field">
+              <label for="typeFilter">Type:</label>
+              <select id="typeFilter">
+                <option value="">All</option>
+              </select>
+            </span>
+            <span class="inline-field">
+              <label for="entriesFilter">Show</label>
+              <select id="entriesFilter">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="0">All</option>
+              </select>
+              entries
+            </span>
+            <button id="clearFiltersButton" class="secondary-button page-button" type="button">Reset</button>
+          </div>
+          <div class="table-toolbar-right">
+            <span class="inline-field">
+              <label for="deviceSearch">Search:</label>
+              <input id="deviceSearch" autocomplete="off">
+            </span>
+          </div>
+        </div>
+        <div id="deviceWrap"></div>
+        <div class="table-footer">
+          <span id="tableInfo">Showing 0 to 0 of 0 entries</span>
+          <span class="pagination">
+            <button id="prevPageButton" class="page-button" type="button">Previous</button>
+            <span id="pageStatus">Page 1 of 1</span>
+            <button id="nextPageButton" class="page-button" type="button">Next</button>
+          </span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DATA_URL = "network_status.json";
+    const DEVICE_API_URL = "/api/devices";
+    const REFRESH_API_URL = "/api/refresh";
+    const REFRESH_MS = 5000;
+
+    const elements = {
+      updatedAt: document.getElementById("updatedAt"),
+      refreshStatus: document.getElementById("refreshStatus"),
+      scanNowButton: document.getElementById("scanNowButton"),
+      download: document.getElementById("download"),
+      upload: document.getElementById("upload"),
+      ping: document.getElementById("ping"),
+      online: document.getElementById("online"),
+      total: document.getElementById("total"),
+      deviceWrap: document.getElementById("deviceWrap"),
+      deviceCount: document.getElementById("deviceCount"),
+      deviceSearch: document.getElementById("deviceSearch"),
+      statusFilter: document.getElementById("statusFilter"),
+      typeFilter: document.getElementById("typeFilter"),
+      entriesFilter: document.getElementById("entriesFilter"),
+      clearFiltersButton: document.getElementById("clearFiltersButton"),
+      tableInfo: document.getElementById("tableInfo"),
+      pageStatus: document.getElementById("pageStatus"),
+      prevPageButton: document.getElementById("prevPageButton"),
+      nextPageButton: document.getElementById("nextPageButton"),
+      chart: document.getElementById("speedChart"),
+      deviceForm: document.getElementById("deviceForm"),
+      addDeviceButton: document.getElementById("addDeviceButton"),
+      cancelEditButton: document.getElementById("cancelEditButton"),
+      formMessage: document.getElementById("formMessage")
+    };
+
+    let latestDevices = [];
+    let editingIp = "";
+    let currentPage = 1;
+
+    function getDeviceValue(device, key, fallback) {
+      return String(device[key] || device[fallback] || "").trim();
+    }
+
+    function formatNumber(value) {
+      const number = Number(value || 0);
+      return number.toFixed(2);
+    }
+
+    function drawChart(history) {
+      const canvas = elements.chart;
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width;
+      const height = canvas.height;
+      const pad = 38;
+      const plotWidth = width - pad * 2;
+      const plotHeight = height - pad * 2;
+      const values = history.flatMap(row => [Number(row.download || 0), Number(row.upload || 0)]);
+      const max = Math.max(10, ...values);
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = "#d8e1e8";
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i <= 4; i += 1) {
+        const y = pad + (plotHeight / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(width - pad, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#607080";
+      ctx.font = "12px Arial";
+      ctx.fillText(`${max.toFixed(0)} Mbps`, 8, pad + 4);
+      ctx.fillText("0", 20, height - pad + 4);
+
+      function drawLine(key, color) {
+        if (!history.length) return;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        history.forEach((row, index) => {
+          const x = pad + (history.length === 1 ? plotWidth : (plotWidth / (history.length - 1)) * index);
+          const y = height - pad - (Number(row[key] || 0) / max) * plotHeight;
+
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.stroke();
+      }
+
+      drawLine("download", "#1f6feb");
+      drawLine("upload", "#16833a");
+
+      ctx.fillStyle = "#1f6feb";
+      ctx.fillRect(pad, height - 20, 12, 4);
+      ctx.fillStyle = "#17202a";
+      ctx.fillText("Download", pad + 18, height - 16);
+      ctx.fillStyle = "#16833a";
+      ctx.fillRect(pad + 110, height - 20, 12, 4);
+      ctx.fillStyle = "#17202a";
+      ctx.fillText("Upload", pad + 128, height - 16);
+    }
+
+    function getFilteredDevices() {
+      const search = elements.deviceSearch.value.trim().toLowerCase();
+      const statusFilter = elements.statusFilter.value;
+      const typeFilter = elements.typeFilter.value;
+
+      return latestDevices.filter(device => {
+        const name = getDeviceValue(device, "Device Name", "name");
+        const ipAddress = getDeviceValue(device, "IP Address", "ip");
+        const type = getDeviceValue(device, "Device Type", "type");
+        const status = getDeviceValue(device, "Status", "status").toLowerCase();
+        const matchesSearch = !search || `${name} ${ipAddress} ${type}`.toLowerCase().includes(search);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesType = !typeFilter || type === typeFilter;
+
+        return matchesSearch && matchesStatus && matchesType;
+      });
+    }
+
+    function getPageSize() {
+      return Number(elements.entriesFilter.value || 10);
+    }
+
+    function updateTypeFilterOptions(devices) {
+      const selectedType = elements.typeFilter.value;
+      const types = Array.from(new Set(
+        devices
+          .map(device => getDeviceValue(device, "Device Type", "type"))
+          .filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b));
+
+      elements.typeFilter.innerHTML = '<option value="">All</option>';
+      types.forEach(type => {
+        const option = document.createElement("option");
+        option.value = type;
+        option.textContent = type;
+        elements.typeFilter.appendChild(option);
+      });
+
+      elements.typeFilter.value = types.includes(selectedType) ? selectedType : "";
+    }
+
+    function renderFilteredDevices() {
+      const filteredDevices = getFilteredDevices();
+      const pageSize = getPageSize();
+      const totalPages = pageSize ? Math.max(1, Math.ceil(filteredDevices.length / pageSize)) : 1;
+
+      currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+
+      const startIndex = pageSize ? (currentPage - 1) * pageSize : 0;
+      const endIndex = pageSize ? startIndex + pageSize : filteredDevices.length;
+      const visibleDevices = filteredDevices.slice(startIndex, endIndex);
+      const showingStart = filteredDevices.length ? startIndex + 1 : 0;
+      const showingEnd = Math.min(endIndex, filteredDevices.length);
+
+      renderDevices(visibleDevices, filteredDevices.length);
+
+      elements.tableInfo.textContent = `Showing ${showingStart} to ${showingEnd} of ${filteredDevices.length} entries`;
+      elements.pageStatus.textContent = `Page ${currentPage} of ${totalPages}`;
+      elements.prevPageButton.disabled = currentPage <= 1;
+      elements.nextPageButton.disabled = currentPage >= totalPages;
+    }
+
+    function resetPageAndRender() {
+      currentPage = 1;
+      renderFilteredDevices();
+    }
+
+    function renderDevices(devices, filteredCount = latestDevices.length) {
+      const totalCount = latestDevices.length;
+      elements.deviceCount.textContent = `${filteredCount}/${totalCount} devices`;
+
+      if (!devices.length) {
+        elements.deviceWrap.innerHTML = totalCount
+          ? '<div class="empty">No devices match the selected filters.</div>'
+          : '<div class="empty">No device data yet. Run the Python monitor first.</div>';
+        return;
+      }
+
+      const rows = devices.map(device => {
+        const status = device.Status || device.status || "";
+        const statusKey = status.toLowerCase();
+        const className = statusKey === "online" ? "online" : statusKey === "offline" ? "offline" : "pending";
+        return `
+          <tr>
+            <td>${getDeviceValue(device, "Device Name", "name")}</td>
+            <td>${getDeviceValue(device, "IP Address", "ip")}</td>
+            <td>${getDeviceValue(device, "Device Type", "type")}</td>
+            <td><span class="status ${className}">${status}</span></td>
+            <td>${formatPing(device["Ping (ms)"] ?? device.ping)}</td>
+            <td>${getDeviceValue(device, "Detection Method", "detection_method") || "--"}</td>
+            <td>${getDeviceValue(device, "Last Seen", "last_seen") || "--"}</td>
+            <td>
+              <span class="row-actions">
+                <button class="action-button" type="button" data-action="edit" data-ip="${getDeviceValue(device, "IP Address", "ip")}">Edit</button>
+                <button class="action-button delete" type="button" data-action="delete" data-ip="${getDeviceValue(device, "IP Address", "ip")}">Delete</button>
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      elements.deviceWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>IP Address</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Ping</th>
+              <th>Via</th>
+              <th>Last Seen</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function isValidIpAddress(value) {
+      const parts = value.trim().split(".");
+      return parts.length === 4 && parts.every(part => {
+        if (!/^\d+$/.test(part)) return false;
+        const number = Number(part);
+        return number >= 0 && number <= 255 && String(number) === String(Number(part));
+      });
+    }
+
+    function setFormMessage(message, type = "") {
+      elements.formMessage.textContent = message;
+      elements.formMessage.className = `form-message ${type}`.trim();
+    }
+
+    function setEditMode(device) {
+      editingIp = device["IP Address"] || device.ip || "";
+      elements.deviceForm.deviceName.value = device["Device Name"] || device.name || "";
+      elements.deviceForm.ipAddress.value = editingIp;
+      elements.deviceForm.deviceType.value = device["Device Type"] || device.type || "Other";
+      elements.deviceForm.notes.value = device.Notes || device.notes || "";
+      elements.addDeviceButton.textContent = "Update Device";
+      elements.cancelEditButton.hidden = false;
+      setFormMessage("Editing selected device.");
+    }
+
+    function clearEditMode() {
+      editingIp = "";
+      elements.deviceForm.reset();
+      elements.addDeviceButton.textContent = "Add Device";
+      elements.cancelEditButton.hidden = true;
+      setFormMessage("");
+    }
+
+    function formatPing(value) {
+      if (value === "" || value === null || value === undefined) return "--";
+      return `${value} ms`;
+    }
+
+    async function addDevice(event) {
+      event.preventDefault();
+
+      const form = new FormData(elements.deviceForm);
+      const deviceName = String(form.get("deviceName") || "").trim();
+      const ipAddress = String(form.get("ipAddress") || "").trim();
+      const deviceType = String(form.get("deviceType") || "").trim();
+      const notes = String(form.get("notes") || "").trim();
+
+      if (!deviceName || !ipAddress) {
+        setFormMessage("Device name and IP are required.", "error");
+        return;
+      }
+
+      if (!isValidIpAddress(ipAddress)) {
+        setFormMessage("Enter a valid IPv4 address.", "error");
+        return;
+      }
+
+      const duplicateDevice = latestDevices.find(device => {
+        const currentIp = device["IP Address"] || device.ip;
+        return currentIp === ipAddress && currentIp !== editingIp;
+      });
+
+      if (duplicateDevice) {
+        setFormMessage("IP address already exists.", "error");
+        return;
+      }
+
+      elements.addDeviceButton.disabled = true;
+      setFormMessage("Saving...");
+
+      try {
+        const response = await fetch(DEVICE_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            "Device Name": deviceName,
+            "IP Address": ipAddress,
+            "Original IP Address": editingIp,
+            "Device Type": deviceType,
+            "Notes": notes
+          })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Cannot save device.");
+
+        if (editingIp && editingIp !== ipAddress && !result.updated) {
+          await fetch(`${DEVICE_API_URL}?ip=${encodeURIComponent(editingIp)}`, {
+            method: "DELETE"
+          });
+        }
+
+        const existingIndex = latestDevices.findIndex(device => (device["IP Address"] || device.ip) === ipAddress);
+        const nextDevice = {
+          "name": deviceName,
+          "ip": ipAddress,
+          "type": deviceType,
+          "status": result.updated ? "Updating" : "Pending",
+          "ping": null,
+          "Device Name": deviceName,
+          "IP Address": ipAddress,
+          "Device Type": deviceType,
+          "Status": result.updated ? "Updating" : "Pending",
+          "Ping (ms)": "",
+          "Detection Method": "",
+          "Last Seen": "",
+          "Notes": notes
+        };
+
+        if (editingIp && editingIp !== ipAddress) {
+          latestDevices = latestDevices.filter(device => (device["IP Address"] || device.ip) !== editingIp);
+        }
+
+        if (existingIndex >= 0) latestDevices[existingIndex] = nextDevice;
+        else latestDevices.push(nextDevice);
+
+        updateTypeFilterOptions(latestDevices);
+        renderFilteredDevices();
+        const message = editingIp || result.updated ? "Device updated." : "Device added.";
+        clearEditMode();
+        setFormMessage(message, "success");
+      } catch (error) {
+        setFormMessage(`${error.message} Run the Python monitor server.`, "error");
+      } finally {
+        elements.addDeviceButton.disabled = false;
+      }
+    }
+
+    async function deleteDevice(ipAddress) {
+      if (!ipAddress) return;
+      const device = latestDevices.find(row => (row["IP Address"] || row.ip) === ipAddress);
+      const name = device ? (device["Device Name"] || device.name || ipAddress) : ipAddress;
+
+      if (!confirm(`Delete ${name}?`)) return;
+
+      try {
+        let response = await fetch(`${DEVICE_API_URL}?ip=${encodeURIComponent(ipAddress)}`, {
+          method: "DELETE"
+        });
+
+        if (response.status === 501 || response.status === 405) {
+          response = await fetch(DEVICE_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              "Action": "delete",
+              "IP Address": ipAddress
+            })
+          });
+        }
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Cannot delete device.");
+
+        latestDevices = latestDevices.filter(row => (row["IP Address"] || row.ip) !== ipAddress);
+        if (editingIp === ipAddress) clearEditMode();
+        updateTypeFilterOptions(latestDevices);
+        renderFilteredDevices();
+        setFormMessage("Device deleted.", "success");
+      } catch (error) {
+        setFormMessage(error.message, "error");
+      }
+    }
+
+    function handleDeviceAction(event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+
+      const ipAddress = button.dataset.ip;
+      if (button.dataset.action === "edit") {
+        const device = latestDevices.find(row => (row["IP Address"] || row.ip) === ipAddress);
+        if (device) setEditMode(device);
+      }
+
+      if (button.dataset.action === "delete") {
+        deleteDevice(ipAddress);
+      }
+    }
+
+    async function loadDeviceList() {
+      try {
+        const response = await fetch(`${DEVICE_API_URL}?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) return [];
+
+        const data = await response.json();
+        return data.devices || [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function mergeDevices(statusDevices, savedDevices) {
+      const devicesByIp = new Map();
+      const savedIps = new Set();
+
+      savedDevices.forEach(device => {
+        const ipAddress = device["IP Address"] || device.ip;
+        if (!ipAddress) return;
+        savedIps.add(ipAddress);
+        devicesByIp.set(ipAddress, {
+          ...device,
+          "Status": "Pending",
+          "Ping (ms)": "",
+          "Detection Method": "",
+          "Last Seen": "",
+          "status": "Pending",
+          "ping": null,
+          "detection_method": "",
+          "last_seen": ""
+        });
+      });
+
+      statusDevices.forEach(device => {
+        const ipAddress = device["IP Address"] || device.ip;
+        if (!ipAddress || (savedIps.size && !savedIps.has(ipAddress))) return;
+        devicesByIp.set(ipAddress, {
+          ...devicesByIp.get(ipAddress),
+          ...device
+        });
+      });
+
+      return Array.from(devicesByIp.values());
+    }
+
+    async function loadData() {
+      try {
+        const [response, savedDevices] = await Promise.all([
+          fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" }),
+          loadDeviceList()
+        ]);
+        if (!response.ok) throw new Error("Data file not found");
+
+        const data = await response.json();
+        const speed = data.speed || {};
+        const summary = data.summary || {};
+        const devices = mergeDevices(data.devices || [], savedDevices);
+        latestDevices = devices;
+        updateTypeFilterOptions(devices);
+        const onlineCount = devices.filter(device => String(device.Status || device.status).toLowerCase() === "online").length;
+
+        elements.updatedAt.textContent = data.updated_at ? `Last update: ${data.updated_at}` : "Waiting for data";
+        elements.refreshStatus.className = "";
+        elements.refreshStatus.textContent = "Auto refresh: 5 seconds";
+        elements.download.textContent = formatNumber(speed.download);
+        elements.upload.textContent = formatNumber(speed.upload);
+        elements.ping.textContent = formatNumber(speed.ping);
+        elements.online.textContent = onlineCount;
+        elements.total.textContent = devices.length || summary.total || 0;
+
+        renderFilteredDevices();
+        drawChart(data.history || []);
+      } catch (error) {
+        elements.refreshStatus.className = "error";
+        elements.refreshStatus.textContent = "Cannot read network_status.json";
+        drawChart([]);
+      }
+    }
+
+    async function scanNow() {
+      elements.scanNowButton.disabled = true;
+      elements.refreshStatus.className = "";
+      elements.refreshStatus.textContent = "Scanning devices now...";
+
+      try {
+        const response = await fetch(REFRESH_API_URL, {
+          method: "POST",
+          cache: "no-store"
+        });
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(result.error || "Cannot scan devices now.");
+        }
+
+        elements.refreshStatus.textContent = `Manual scan complete: ${result.devices || 0} devices`;
+        await loadData();
+      } catch (error) {
+        elements.refreshStatus.className = "error";
+        elements.refreshStatus.textContent = error.message;
+      } finally {
+        elements.scanNowButton.disabled = false;
+      }
+    }
+
+    elements.scanNowButton.addEventListener("click", scanNow);
+    elements.deviceForm.addEventListener("submit", addDevice);
+    elements.cancelEditButton.addEventListener("click", clearEditMode);
+    elements.deviceWrap.addEventListener("click", handleDeviceAction);
+    elements.deviceSearch.addEventListener("input", resetPageAndRender);
+    elements.statusFilter.addEventListener("change", resetPageAndRender);
+    elements.typeFilter.addEventListener("change", resetPageAndRender);
+    elements.entriesFilter.addEventListener("change", resetPageAndRender);
+    elements.prevPageButton.addEventListener("click", () => {
+      currentPage -= 1;
+      renderFilteredDevices();
+    });
+    elements.nextPageButton.addEventListener("click", () => {
+      currentPage += 1;
+      renderFilteredDevices();
+    });
+    elements.clearFiltersButton.addEventListener("click", () => {
+      elements.deviceSearch.value = "";
+      elements.statusFilter.value = "";
+      elements.typeFilter.value = "";
+      resetPageAndRender();
+    });
+    loadData();
+    setInterval(loadData, REFRESH_MS);
+  </script>
+</body>
+</html>
