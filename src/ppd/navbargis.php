@@ -136,8 +136,8 @@
             <!-- Left Section -->
             <div class="left-section">
                 <a href="#" class="navbar-brand">
-                    <img src="/admin/images/mpw-icon.png" alt="MPW Logo" class="navbar-logo">
-                    PLANNING AND PROGRAMMING DIVISION PIMS | MPW-BARMM
+                    <img src="/images/mpw-icon.png" alt="MPW Logo" class="navbar-logo">
+                    MINISTRY OF PUBLIC WORKS
                 </a>
             </div>
 
@@ -155,20 +155,19 @@
 
 
                 
-             <div class="dropdown">
+             <!-- <div class="dropdown">
                  <button class="dropbtn"><i class="far fa-list-alt"></i> List <i class="fa fa-caret-down"></i></button>
                  <div class="dropdown-content">
-                     <!-- <a href="#">User</a> -->
                      <a href="indexdocs_cside_fundedgis.php">Funded</a>
-                     <!-- <a href="unfunded_cside1.php">Unfunded</a> -->
-                     <!-- <a href="indexdocs_cside_planning1.php">Planning</a> -->
+                     <a href="unfunded_cside1.php">Unfunded</a>
+                     <a href="indexdocs_cside_planning1.php">Planning</a>
                      <a href="ebarmmdocs.php">Documents</a>
-                     <!-- <a href="">Register</a> -->
-                     <!-- <a href="adminviewdocs2.php">Viewer2</a> -->
-                     <!-- <a href="#">Unfunded</a> -->
-                     <!-- <a href="#">Planning</a> -->
+                     <a href="">Register</a>
+                     <a href="adminviewdocs2.php">Viewer2</a>
+                     <a href="#">Unfunded</a>
+                     <a href="#">Planning</a>
                  </div>
-             </div>
+             </div> -->
 
                 <!-- Project List -->
                 <!-- <div class="dropdown">

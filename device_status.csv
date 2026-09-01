@@ -1,0 +1,12 @@
+Device Name,IP Address,MAC Address,Device Type,Status,Ping (ms),Detection Method,Last Check,Last Seen,Notes
+SAUDI-PC,192.168.1.215,,PC,Online,<1,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",This PC
+Raj,192.168.1.148,,PC,Offline,,No response,"Sep 01, 2026 • 11:26 AM","Aug 27, 2026 • 03:13 PM",
+Daps,192.168.1.89,,PC,Offline,,No response,"Sep 01, 2026 • 11:26 AM",,
+Planning printer,192.168.1.185,,Printer,Online,3.0,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",
+Ian,192.168.1.16,,PC,Online,1.0,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",
+Planning Router 5G,192.168.1.3,,Router,Online,694.0,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",
+Havier,192.168.1.95,,PC,Offline,,No response,"Sep 01, 2026 • 11:26 AM","Aug 27, 2026 • 03:13 PM",
+Ate Nelly,192.168.1.166,,PC,Online,1.0,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",
+Aubrey,192.168.1.232,,PC,Offline,,No response,"Sep 01, 2026 • 11:26 AM",,
+Ceds,192.168.1.9,,PC,Online,1.0,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",
+Planning printer 2,192.168.1.116,,Printer,Online,64.0,Ping,"Sep 01, 2026 • 11:26 AM","Sep 01, 2026 • 11:26 AM",

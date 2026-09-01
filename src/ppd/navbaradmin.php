@@ -136,7 +136,7 @@
             <!-- Left Section -->
             <div class="left-section">
                 <a href="#" class="navbar-brand">
-                    <img src="/admin/images/mpw-icon.png" alt="MPW Logo" class="navbar-logo">
+                    <img src="images/mpw-icon.png" alt="MPW Logo" class="navbar-logo">
                     PLANNING AND PROGRAMMING DIVISION PIMS | MPW-BARMM
                 </a>
             </div>

@@ -66,7 +66,7 @@ REFRESH_LOCK = threading.Lock()
 
 
 def now_text():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now().strftime("%b %d, %Y • %I:%M %p")
 
 
 def get_google_client():

@@ -12,6 +12,14 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd mysqli pdo pdo_mysql
 
+RUN { \
+    echo "upload_max_filesize=256M"; \
+    echo "post_max_size=256M"; \
+    echo "max_file_uploads=50"; \
+    echo "memory_limit=512M"; \
+    echo "max_execution_time=300"; \
+} > /usr/local/etc/php/conf.d/uploads.ini
+
 RUN a2enmod rewrite
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \

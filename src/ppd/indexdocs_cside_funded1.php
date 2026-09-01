@@ -54,6 +54,149 @@ session_start();
             padding: 8px;
             text-align: left;
         }
+
+        .files-explorer-shell {
+            border: 1px solid #d7dce2;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .files-explorer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 10px;
+            background: #f5f7fa;
+            border-bottom: 1px solid #d7dce2;
+        }
+
+        .files-explorer-title {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #38424f;
+        }
+
+        .files-explorer-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .files-icon-btn {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: #38424f;
+        }
+
+        .files-icon-btn:hover {
+            background: #e7ebf0;
+            color: #0a376e;
+        }
+
+        .files-icon-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .files-upload-panel {
+            padding: 12px;
+            border-bottom: 1px solid #e4e7eb;
+        }
+
+        .files-target-label {
+            font-size: 12px;
+            color: #607080;
+        }
+
+        .files-target-label strong {
+            color: #28323d;
+        }
+
+        .files-explorer-body {
+            min-height: 260px;
+            max-height: 430px;
+            overflow: auto;
+            padding: 6px;
+        }
+
+        .files-tree-row {
+            display: flex;
+            align-items: center;
+            min-height: 34px;
+            gap: 8px;
+            padding: 5px 8px;
+            border-radius: 4px;
+            color: #26313d;
+        }
+
+        .files-tree-row:hover,
+        .files-tree-row.is-selected {
+            background: #eaf3ff;
+        }
+
+        .files-tree-row.is-drag-over,
+        .files-explorer-body.is-drag-over {
+            background: #d8ecff;
+            outline: 2px dashed #2584d8;
+            outline-offset: -2px;
+        }
+
+        .files-tree-row.is-cut {
+            opacity: .55;
+            background: #fff8df;
+        }
+
+        .files-tree-row.is-folder {
+            padding-left: calc(8px + (var(--tree-depth, 0) * 24px));
+        }
+
+        .files-tree-row.is-file {
+            padding-left: calc(36px + (var(--tree-depth, 0) * 24px));
+        }
+
+        .files-tree-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .files-tree-name {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .files-tree-meta {
+            display: block;
+            font-size: 12px;
+            color: #6b7785;
+        }
+
+        .files-tree-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 auto;
+        }
+
+        .files-empty-state {
+            padding: 26px 12px;
+            text-align: center;
+            color: #6b7785;
+            font-style: italic;
+        }
     </style>
 </head>
 
@@ -92,8 +235,8 @@ session_start();
 
 
         <!-- Add button -->
-        <!-- 
-        <div class="d-flex justify-content-end mb-2">
+
+        <!-- <div class="d-flex justify-content-end mb-2">
             <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#form_modal">
                 <i class="fas fa-plus"></i> Add
             </button>
@@ -195,6 +338,7 @@ session_start();
                                 <option value="TDIF">TDIF</option>
                                 <option value="SDF">SDF</option>
                                 <option value="Contingency Fund">CONTINGENCY FUND</option>
+                                <option value="Supplemental Fund">SUPPLEMENTAL FUND</option>
                                 <option value="OPPAP">OPPAP</option>
                                 <option value="DA-FMR">DA-FMR</option>
                                 <option value="PAMANA-DILG">PAMANA-DILG</option>
@@ -230,25 +374,20 @@ session_start();
                             <label class="required">Proponent:</label>
                             <textarea class="form-control" name="proponent" rows="1"></textarea>
                         </div>
-
+                        <!-- 
                         <div class="form-group" hidden>
                             <label class="required">Status:</label>
                             <textarea class="form-control" name="status" rows="2"></textarea>
-                        </div>
-                        <div class="form-group" hidden>
+                        </div> -->
+                        <!-- <div class="form-group" hidden>
                             <label class="required">Regional Office Remarks:</label>
                             <textarea class="form-control" name="ro_remarks" rows="2"></textarea>
-                        </div>
-                        <div class="form-group" hidden>
+                        </div> -->
+                        <!-- <div class="form-group" hidden>
                             <label class="required">Distruct Engineering Office Remarks:</label>
                             <textarea class="form-control" name="deo_remarks" rows="2"></textarea>
-                        </div>
+                        </div> -->
 
-
-                        <div class="form-group">
-                            <label>Attach Document (pdf/Image only)</label>
-                            <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png">
-                        </div>
 
                         <!-- Upload Progress UI -->
                         <div id="uploadProgressContainerAdd" style="display:none;">
@@ -302,8 +441,8 @@ session_start();
                 e.preventDefault();
 
                 //add
-                const fileInput = $('input[name="file"]')[0];
-                const hasFile = fileInput.files && fileInput.files.length > 0;
+                const fileInput = $(this).find('input[name="file"]')[0];
+                const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
 
 
                 //message function
@@ -552,6 +691,48 @@ session_start();
     </div>
 
 
+    <!-- Project Files Modal -->
+    <div class="modal fade" id="filesModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div id="fundedFilesForm">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Project Files</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="funded_id" id="filesFundedId">
+                        <input type="hidden" name="folder_id" id="filesFolderId">
+
+                        <div id="filesAlert" class="alert" style="display:none;"></div>
+
+                        <div class="files-explorer-shell">
+                            <div class="files-explorer-bar">
+                                <h5 class="files-explorer-title">Files</h5>
+                                <div class="files-explorer-actions">
+                                    <button type="button" class="files-icon-btn" id="filesRefreshBtn" title="Refresh Explorer">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button type="button" class="files-icon-btn" id="filesCollapseBtn" title="Collapse Folders">
+                                        <i class="fas fa-compress-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="fundedFilesExplorer" class="files-explorer-body"></div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 
 
@@ -650,7 +831,8 @@ session_start();
                                 <option value="RegularInfra">RegularInfra</option>
                                 <option value="TDIF">TDIF</option>
                                 <option value="SDF">SDF</option>
-                                <option value="CONTINGENCY FUND">CONTINGENCY FUND</option>
+                                <option value="Contingency Fund">CONTINGENCY FUND</option>
+                                <option value="Supplemental Fund">SUPPLEMENTAL FUND</option>
                                 <option value="OPPAP">OPPAP</option>
                                 <option value="DA-FMR">DA-FMR</option>
                                 <option value="PAMANA-DILG">PAMANA-DILG</option>
@@ -695,8 +877,8 @@ session_start();
                             <label>Status</label>
                             <textarea class="form-control" name="status" id="status" rows="3"></textarea>
                         </div> -->
-<!-- 
-                        <div class="form-group" hidden>
+
+                        <!-- <div class="form-group" hidden>
                             <label>RO Remarks</label>
                             <textarea class="form-control" name="ro_remarks" id="ro_remarks" rows="3"></textarea>
                         </div> -->
@@ -708,9 +890,8 @@ session_start();
 
 
                         <div class="form-group">
-                            <label for="file">File(*PDF)</label>
-                            <input type="file" class="form-control" name="file" id="file" accept=".pdf,.jpg,.jpeg,.png">
-                            <small id="existing_file" class="text-muted"></small>
+                            <label>Current File</label>
+                            <div id="existing_file" class="text-muted"></div>
                         </div>
 
                         <!-- Progress Bar -->
@@ -726,15 +907,6 @@ session_start();
                             <button type="button" class="btn btn-warning btn-sm" id="cancelUploadBtn">
                                 ✖ Cancel Upload
                             </button>
-                        </div>
-
-
-                        <!-- Progress Bar -->
-                        <div class="position-relative mt-2" style="display: none;" id="uploadProgressContainer">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%;" id="uploadProgressBar"></div>
-                            </div>
-                            <div id="uploadPercentText">0%</div>
                         </div>
 
                     </div>
@@ -947,8 +1119,8 @@ session_start();
                             },
                             dataType: 'json',
                             success: function(newData) {
-                                if (newData && newData.stud_id8) {
-                                    const row = table.row('#' + newData.stud_id8);
+                                if (newData && newData.stud_id2) {
+                                    const row = table.row('#' + newData.stud_id2);
                                     row.node() ? row.data(newData).draw(false) :
                                         table.ajax.reload(null, false);
                                 } else {
@@ -1003,7 +1175,12 @@ session_start();
             document.getElementById('barangay').value = rowData.barangay || '';
             document.getElementById('sitio').value = rowData.sitio || '';
             document.getElementById('cy').value = rowData.cy || '';
-            document.getElementById('fund_source').value = rowData.fund_source || '';
+            const fundSourceSelect = document.getElementById('fund_source');
+            const fundSourceValue = normalizeFundSource(rowData.fund_source || '');
+            if (fundSourceValue && ![...fundSourceSelect.options].some(option => option.value === fundSourceValue)) {
+                fundSourceSelect.add(new Option(fundSourceValue, fundSourceValue));
+            }
+            fundSourceSelect.value = fundSourceValue;
             document.getElementById('moi').value = rowData.moi || '';
             document.getElementById('proj_target').value = rowData.proj_target || '';
             document.getElementById('proj_plan').value = rowData.proj_plan || '';
@@ -1022,6 +1199,15 @@ session_start();
             }
 
             $('#edit_modal').modal('show');
+        }
+
+        function normalizeFundSource(value) {
+            const normalizedValue = String(value || '').trim();
+            const fundSourceMap = {
+                'CONTINGENCY FUND': 'Contingency Fund'
+            };
+
+            return fundSourceMap[normalizedValue.toUpperCase()] || normalizedValue;
         }
     </script>
 
@@ -1306,28 +1492,36 @@ session_start();
                         title: 'Location Map',
                         data: 'file',
                         render: function(data, type, row, meta) {
-                            return `<button class="btn btn-sm btn-info view-btn" data-file="${data}">
+                            return `<center><button class="btn btn-sm btn-info view-btn" data-file="${data}">
                                         <i class="fas fa-eye"></i> View
                                     </button>
+                                    <button class="btn btn-sm btn-secondary files-btn" data-id="${row.stud_id2}" style="margin-top: 1px;">
+                                        <i class="fas fa-folder-open"></i> Files
+                                    </button></center>
                                 `
                         }
-                    },
-                    // {
-                    //     title: 'ACTION',
-                    //     data: 'file',
-                    //     render: function(data, type, row, meta) {
-                    //         return `
-                    //                 <button style="margin-top: 1px;" class="btn btn-warning btn-sm edit-btn" data-row="${meta.row}">
-                    //                 <i class="fas fa-edit"></i> Edit
-                    //                 </button> <br>
-                    //                 <button style="margin-top: 1px;" class="btn btn-danger btn-sm btn-delete" 
-                    //                 data-id="${row.stud_id2}">
-                    //                 <i class="fas fa-trash"></i> Del
-                    //                 </button>
-                    //             `;
-                    //     }
-                    // }
+                    }
                 ],
+
+                //    {
+                //         title: 'ACTION',
+                //         data: 'file',
+                //         render: function(data, type, row, meta) {
+                //             return `
+                //                     <center><button style="margin-top: 1px;" class="btn btn-warning btn-sm edit-btn" data-row="${meta.row}">
+                //                     <i class="fas fa-edit"></i> Edit
+                //                     </button> <br>
+                //                     <button style="margin-top: 1px;" class="btn btn-danger btn-sm btn-delete" 
+                //                     data-id="${row.stud_id2}">
+                //                     <i class="fas fa-trash"></i> Del
+                //                     </button></center>
+                //                 `;
+                //         }
+                //     }
+
+
+
+
 
                 initComplete: function() {
                     const deoColumn = this.api().column(0);
@@ -1349,6 +1543,937 @@ session_start();
                         deoColumn.search(selectedDEO).draw();
                     });
                 }
+            });
+
+            const projectFilesViewerOnly = true;
+
+            function showFilesAlert(type, message) {
+                $('#filesAlert')
+                    .removeClass('alert-success alert-danger')
+                    .addClass(type === 'success' ? 'alert-success' : 'alert-danger')
+                    .text(message)
+                    .show();
+            }
+
+            function showCutFilesAlert() {
+                const cutItem = cutFile || cutFolder;
+
+                if (!cutItem) {
+                    return;
+                }
+
+                $('#filesAlert')
+                    .removeClass('alert-success alert-danger')
+                    .addClass('alert-success')
+                    .html('"' + escapeHtml(cutItem.name) + '" cut. Choose a folder and click paste. <button type="button" class="btn btn-sm btn-outline-secondary ml-2" id="cancelCutFileBtn">Cancel</button>')
+                    .show();
+            }
+
+            function resetFilesUploadProgress() {
+                $('#filesUploadProgressContainer').hide();
+                $('#filesUploadProgressBar').css('width', '0%');
+                $('#filesUploadPercentText').text('0%');
+                $('#filesUploadStats').text('0 MB / 0 MB');
+                $('#filesUploadBtn').prop('disabled', false).html('<i class="fas fa-upload"></i> Upload');
+            }
+
+            function finishFilesUploadProgress() {
+                $('#filesUploadProgressBar').css('width', '100%');
+                $('#filesUploadPercentText').text('Upload complete');
+
+                setTimeout(function() {
+                    $('#filesUploadProgressContainer').fadeOut(200, function() {
+                        $('#filesUploadProgressBar').css('width', '0%');
+                        $('#filesUploadPercentText').text('0%');
+                        $('#filesUploadStats').text('0 MB / 0 MB');
+                    });
+                }, 1000);
+            }
+
+            function escapeHtml(value) {
+                return $('<div>').text(value || '').html();
+            }
+
+            let fundedFilesState = {
+                folders: [],
+                files: []
+            };
+            let collapsedFolderIds = {};
+            let cutFile = null;
+            let cutFolder = null;
+
+            function folderLabel(folderId) {
+                if (!folderId) {
+                    return 'Project root';
+                }
+
+                const folder = fundedFilesState.folders.find(item => String(item.id) === String(folderId));
+                return folder ? folder.name : 'Project root';
+            }
+
+            function updateFilesUploadTarget() {
+                const folderId = $('#filesFolderId').val();
+                $('#filesUploadTarget').text(folderLabel(folderId));
+            }
+
+            function hasActiveCut() {
+                return !!(cutFile || cutFolder);
+            }
+
+            function clearActiveCut() {
+                cutFile = null;
+                cutFolder = null;
+            }
+
+            function updateCutActionState() {
+                const isCutting = hasActiveCut();
+                $('#filesNewFolderBtn').prop('disabled', isCutting);
+            }
+
+            function isFolderDescendant(folderId, possibleParentId) {
+                let current = fundedFilesState.folders.find(folder => String(folder.id) === String(folderId));
+
+                while (current && current.parent_id) {
+                    if (String(current.parent_id) === String(possibleParentId)) {
+                        return true;
+                    }
+
+                    current = fundedFilesState.folders.find(folder => String(folder.id) === String(current.parent_id));
+                }
+
+                return false;
+            }
+
+            function canPasteCutFolder(destinationFolderId) {
+                if (!cutFolder) {
+                    return false;
+                }
+
+                const destination = String(destinationFolderId || '');
+                const currentParent = String(cutFolder.parent_id || '');
+
+                return destination !== String(cutFolder.id) &&
+                    destination !== currentParent &&
+                    !isFolderDescendant(destination, cutFolder.id);
+            }
+
+            function renderFileRow(file, depth = 0) {
+                const displayName = escapeHtml(file.original_name || file.file_name);
+                const uploadedAt = escapeHtml(file.uploaded_at || '');
+                const fileSize = escapeHtml(file.size_label || '0 B');
+                const fileUrl = escapeHtml(file.url || '#');
+
+                return `
+                    <div class="files-tree-row is-file" style="--tree-depth:${depth};">
+                        <i class="far fa-file-alt text-muted"></i>
+                        <div class="files-tree-main">
+                            <span class="files-tree-name">${displayName}</span>
+                            <span class="files-tree-meta">${uploadedAt + ' - ' + fileSize}</span>
+                        </div>
+                        <div class="files-tree-actions">
+                            <a class="btn btn-sm btn-info" href="${fileUrl}" target="_blank" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderFolderRow(folder, depth = 0) {
+                const folderId = String(folder.id);
+                const isCollapsed = !!collapsedFolderIds[folderId];
+                const isSelected = String($('#filesFolderId').val()) === folderId;
+                const icon = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
+                const folderIcon = isCollapsed ? 'fa-folder' : 'fa-folder-open';
+                const folderName = escapeHtml(folder.name);
+                const childFolders = fundedFilesState.folders.filter(item => String(item.parent_id || '') === folderId);
+                const childFiles = fundedFilesState.files.filter(file => String(file.folder_id || '') === folderId);
+                const childRows = isCollapsed ? '' : [
+                    ...childFolders.map(childFolder => renderFolderRow(childFolder, depth + 1)),
+                    ...childFiles.map(file => renderFileRow(file, depth + 1))
+                ].join('');
+
+                return `
+                    <div class="files-tree-row is-folder files-folder-row ${isSelected ? 'is-selected' : ''}" data-folder-id="${folderId}" style="--tree-depth:${depth};">
+                        <button type="button" class="files-icon-btn toggle-folder-btn" data-folder-id="${folderId}" title="Toggle Folder">
+                            <i class="fas ${icon}"></i>
+                        </button>
+                        <i class="fas ${folderIcon} text-warning"></i>
+                        <div class="files-tree-main">
+                            <span class="files-tree-name">${folderName}</span>
+                            <span class="files-tree-meta">${childFolders.length + ' folder(s), ' + childFiles.length + ' file(s)'}</span>
+                        </div>
+                    </div>
+                    ${childRows}
+                `;
+            }
+
+            function renderFundedFilesExplorer(response) {
+                fundedFilesState.folders = response.folders || [];
+                fundedFilesState.files = response.files || [];
+
+                if (cutFile && !fundedFilesState.files.some(file => String(file.id) === String(cutFile.id))) {
+                    clearActiveCut();
+                    $('#filesAlert').hide();
+                }
+
+                if (cutFolder && !fundedFilesState.folders.some(folder => String(folder.id) === String(cutFolder.id))) {
+                    clearActiveCut();
+                    $('#filesAlert').hide();
+                }
+
+                const selectedFolderId = $('#filesFolderId').val();
+                const folderExists = fundedFilesState.folders.some(folder => String(folder.id) === String(selectedFolderId));
+                if (selectedFolderId && !folderExists) {
+                    $('#filesFolderId').val('');
+                }
+
+                updateFilesUploadTarget();
+
+                const rootFiles = fundedFilesState.files.filter(file => !file.folder_id || String(file.folder_id) === '0');
+                const rootFolders = fundedFilesState.folders.filter(folder => !folder.parent_id || String(folder.parent_id) === '0');
+                const rootSelected = !$('#filesFolderId').val();
+                let html = `
+                    <div class="files-tree-row files-root-row ${rootSelected ? 'is-selected' : ''}" data-folder-id="">
+                        <i class="fas fa-home text-secondary"></i>
+                        <div class="files-tree-main">
+                            <span class="files-tree-name">Project root</span>
+                            <span class="files-tree-meta">${rootFolders.length} folder(s), ${rootFiles.length} file(s)</span>
+                        </div>
+                    </div>
+                    ${rootFolders.map(folder => renderFolderRow(folder, 0)).join('')}
+                    ${rootFiles.map(file => renderFileRow(file, 0)).join('')}
+                `;
+
+                if (!fundedFilesState.folders.length && !fundedFilesState.files.length) {
+                    html += '<div class="files-empty-state">No files attached yet.</div>';
+                }
+
+                $('#fundedFilesExplorer').html(html);
+                updateCutActionState();
+            }
+
+            function renderFundedFilesTable(files) {
+                if ($.fn.DataTable.isDataTable('#fundedFilesTable')) {
+                    $('#fundedFilesTable').DataTable().clear().destroy();
+                }
+
+                $('#fundedFilesTable tbody').empty();
+
+                $('#fundedFilesTable').DataTable({
+                    data: files,
+                    pageLength: 5,
+                    lengthMenu: [
+                        [5, 10, 25, 50, -1],
+                        [5, 10, 25, 50, 'All']
+                    ],
+                    order: [
+                        [1, 'desc']
+                    ],
+                    columns: [{
+                            data: null,
+                            render: function(data, type, row) {
+                                const displayName = escapeHtml(row.original_name || row.file_name);
+                                return `<span class="font-weight-bold">📄 ${displayName}</span>`;
+                            }
+                        },
+                        {
+                            data: 'uploaded_at',
+                            defaultContent: ''
+                        },
+                        {
+                            data: 'size_label',
+                            defaultContent: '0 B'
+                        },
+                        {
+                            data: null,
+                            orderable: false,
+                            searchable: false,
+                            render: function(data, type, row) {
+                                return `
+                                    <div class="text-nowrap">
+                                        <center><a class="btn btn-sm btn-info" href="${row.url}" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+
+                                        <button type="button" class="btn btn-sm btn-danger delete-file-btn" data-id="${row.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button></center>
+                                    </div>
+                                `;
+                            }
+                        }
+                    ],
+                    language: {
+                        emptyTable: 'No files attached yet.'
+                    }
+                });
+            }
+
+
+            // <a class="btn btn-sm btn-success" href="${row.url}" download>
+            //                                 <i class="fas fa-download"></i>
+            //                             </a>
+
+            function loadFundedFiles(fundedId) {
+                $('#fundedFilesExplorer').html('<div class="files-empty-state">Loading files...</div>');
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        action: 'list',
+                        funded_id: fundedId
+                    },
+                    success: function(response) {
+                        if (response.status !== 'success') {
+                            showFilesAlert('error', response.message || 'Unable to load files.');
+                            return;
+                        }
+
+                        renderFundedFilesExplorer(response);
+                        return;
+
+                        if (!response.files.length) {
+                            list.html('<div class="text-muted text-center p-3">No files attached yet.</div>');
+                            return;
+                        }
+
+                        const html = response.files.map(file => {
+                            const displayName = file.original_name || file.file_name;
+                            const uploadedAt = file.uploaded_at || '';
+                            const fileSize = file.size_label || '0 B';
+
+                            return `
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div style="min-width:0;">
+                                        <div class="font-weight-bold text-truncate">📄 ${displayName}</div>
+                                        <small class="text-muted">${uploadedAt} &bull; ${fileSize}</small>
+                                    </div>
+                                    <div class="ml-2 text-nowrap">
+                                        <a class="btn btn-sm btn-info" href="${file.url}" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a class="btn btn-sm btn-success" href="${file.url}" download>
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger delete-file-btn" data-id="${file.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+
+                        list.html(html);
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseText ? xhr.responseText.replace(/<[^>]*>/g, '').trim() : 'Unable to load files.';
+                        $('#fundedFilesExplorer').html(`<div class="files-empty-state text-danger">${escapeHtml(message || 'Unable to load files.')}</div>`);
+                    }
+                });
+            }
+
+            $('#your-table').on('click', '.files-btn', function() {
+                const fundedId = $(this).data('id');
+
+                $('#filesFundedId').val(fundedId);
+                $('#filesFolderId').val('');
+                $('#fundedFilesInput').val('');
+                $('#fundedFoldersInput').val('');
+                $('#filesAlert').hide();
+                clearActiveCut();
+                collapsedFolderIds = {};
+                updateFilesUploadTarget();
+                resetFilesUploadProgress();
+                $('#filesModal').modal('show');
+                loadFundedFiles(fundedId);
+            });
+
+            $('#filesNewFileBtn').on('click', function() {
+                $('#fundedFilesInput').trigger('click');
+            });
+
+            $('#filesChooseFolderBtn').on('click', function() {
+                $('#fundedFoldersInput').trigger('click');
+            });
+
+            function createProjectFolder(parentId) {
+                const fundedId = $('#filesFundedId').val();
+                const folderName = prompt('Folder name');
+
+                if (folderName === null) {
+                    return;
+                }
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'create_folder',
+                        funded_id: fundedId,
+                        parent_id: parentId,
+                        folder_name: folderName
+                    },
+                    success: function(response) {
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Done.');
+                        if (response.status === 'success') {
+                            $('#filesFolderId').val(parentId || '');
+                            updateFilesUploadTarget();
+                            loadFundedFiles(fundedId);
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseText ? xhr.responseText.replace(/<[^>]*>/g, '').trim() : 'Folder could not be created.';
+                        showFilesAlert('error', message || 'Folder could not be created.');
+                    }
+                });
+            }
+
+            $('#filesNewFolderBtn').on('click', function() {
+                if (hasActiveCut()) {
+                    return;
+                }
+
+                createProjectFolder($('#filesFolderId').val());
+            });
+
+            $('#fundedFilesExplorer').on('click', '.add-child-folder-btn', function(e) {
+                e.stopPropagation();
+                if (hasActiveCut()) {
+                    return;
+                }
+
+                const parentId = $(this).data('folder-id') || '';
+                collapsedFolderIds[String(parentId)] = false;
+                createProjectFolder(parentId);
+            });
+
+            $('#filesRefreshBtn').on('click', function() {
+                const fundedId = $('#filesFundedId').val();
+                if (fundedId) {
+                    loadFundedFiles(fundedId);
+                }
+            });
+
+            $('#filesCollapseBtn').on('click', function() {
+                collapsedFolderIds = {};
+                fundedFilesState.folders.forEach(folder => {
+                    collapsedFolderIds[String(folder.id)] = true;
+                });
+                renderFundedFilesExplorer(fundedFilesState);
+            });
+
+            $('#fundedFilesExplorer').on('click', '.files-folder-row, .files-root-row', function(e) {
+                if ($(e.target).closest('button, a').length) {
+                    return;
+                }
+
+                $('#filesFolderId').val($(this).data('folder-id') || '');
+                updateFilesUploadTarget();
+                renderFundedFilesExplorer(fundedFilesState);
+            });
+
+            $('#fundedFilesExplorer').on('click', '.toggle-folder-btn', function(e) {
+                e.stopPropagation();
+                const folderId = String($(this).data('folder-id'));
+                collapsedFolderIds[folderId] = !collapsedFolderIds[folderId];
+                renderFundedFilesExplorer(fundedFilesState);
+            });
+
+            $('#fundedFilesExplorer').on('click', '.edit-folder-btn', function(e) {
+                e.stopPropagation();
+
+                const fundedId = $('#filesFundedId').val();
+                const folderId = $(this).data('folder-id');
+                const currentName = $(this).data('folder-name');
+                const folderName = prompt('Edit folder name', currentName);
+
+                if (folderName === null) {
+                    return;
+                }
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'rename_folder',
+                        funded_id: fundedId,
+                        folder_id: folderId,
+                        folder_name: folderName
+                    },
+                    success: function(response) {
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Done.');
+                        if (response.status === 'success') {
+                            loadFundedFiles(fundedId);
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseText ? xhr.responseText.replace(/<[^>]*>/g, '').trim() : 'Folder could not be renamed.';
+                        showFilesAlert('error', message || 'Folder could not be renamed.');
+                    }
+                });
+            });
+
+            $('#fundedFilesExplorer').on('click', '.delete-folder-btn', function(e) {
+                e.stopPropagation();
+
+                if (hasActiveCut()) {
+                    showCutFilesAlert();
+                    return;
+                }
+
+                const fundedId = $('#filesFundedId').val();
+                const folderId = $(this).data('folder-id');
+                const folderName = $(this).data('folder-name') || 'this folder';
+
+                if (!confirm('Delete "' + folderName + '" and all files inside it?')) {
+                    return;
+                }
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'delete_folder',
+                        funded_id: fundedId,
+                        folder_id: folderId
+                    },
+                    success: function(response) {
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Done.');
+
+                        if (response.status === 'success') {
+                            if (String($('#filesFolderId').val()) === String(folderId)) {
+                                $('#filesFolderId').val('');
+                                updateFilesUploadTarget();
+                            }
+
+                            delete collapsedFolderIds[String(folderId)];
+                            loadFundedFiles(fundedId);
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseText ? xhr.responseText.replace(/<[^>]*>/g, '').trim() : 'Folder delete failed.';
+                        showFilesAlert('error', message || 'Folder delete failed.');
+                    }
+                });
+            });
+
+            $('#fundedFilesExplorer').on('click', '.cut-file-btn', function(e) {
+                e.stopPropagation();
+
+                const attachmentId = $(this).data('id');
+
+                if (cutFile && String(cutFile.id) === String(attachmentId)) {
+                    clearActiveCut();
+                    $('#filesAlert').hide();
+                    renderFundedFilesExplorer(fundedFilesState);
+                    return;
+                }
+
+                const file = fundedFilesState.files.find(item => String(item.id) === String(attachmentId));
+
+                if (!file) {
+                    showFilesAlert('error', 'File was not found.');
+                    return;
+                }
+
+                cutFolder = null;
+                cutFile = {
+                    id: file.id,
+                    name: file.original_name || file.file_name,
+                    folder_id: file.folder_id || ''
+                };
+
+                showCutFilesAlert();
+                renderFundedFilesExplorer(fundedFilesState);
+            });
+
+            $('#filesAlert').on('click', '#cancelCutFileBtn', function() {
+                clearActiveCut();
+                $('#filesAlert').hide();
+                renderFundedFilesExplorer(fundedFilesState);
+            });
+
+            $('#fundedFilesExplorer').on('click', '.cut-folder-btn', function(e) {
+                e.stopPropagation();
+
+                const folderId = $(this).data('folder-id');
+
+                if (cutFolder && String(cutFolder.id) === String(folderId)) {
+                    clearActiveCut();
+                    $('#filesAlert').hide();
+                    renderFundedFilesExplorer(fundedFilesState);
+                    return;
+                }
+
+                const folder = fundedFilesState.folders.find(item => String(item.id) === String(folderId));
+
+                if (!folder) {
+                    showFilesAlert('error', 'Folder was not found.');
+                    return;
+                }
+
+                cutFile = null;
+                cutFolder = {
+                    id: folder.id,
+                    name: folder.name,
+                    parent_id: folder.parent_id || ''
+                };
+
+                showCutFilesAlert();
+                renderFundedFilesExplorer(fundedFilesState);
+            });
+
+            $('#fundedFilesExplorer').on('click', '.paste-item-btn', function(e) {
+                e.stopPropagation();
+
+                const fundedId = $('#filesFundedId').val();
+                const folderId = $(this).data('folder-id') || '';
+
+                if (!hasActiveCut()) {
+                    showFilesAlert('error', 'Please cut a file or folder first.');
+                    return;
+                }
+
+                const requestData = cutFile ? {
+                    action: 'move_file',
+                    funded_id: fundedId,
+                    id: cutFile.id,
+                    folder_id: folderId
+                } : {
+                    action: 'move_folder',
+                    funded_id: fundedId,
+                    folder_id: cutFolder.id,
+                    parent_id: folderId
+                };
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: requestData,
+                    success: function(response) {
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Done.');
+
+                        if (response.status === 'success') {
+                            clearActiveCut();
+                            $('#filesFolderId').val(folderId);
+                            updateFilesUploadTarget();
+                            loadFundedFiles(fundedId);
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseText ? xhr.responseText.replace(/<[^>]*>/g, '').trim() : 'Move failed.';
+                        showFilesAlert('error', message || 'Move failed.');
+                    }
+                });
+            });
+
+            function addUploadFile(formData, file, relativePath) {
+                const path = (relativePath || file.webkitRelativePath || '').replace(/\\/g, '/');
+                formData.append('files[]', file, path || file.name);
+                formData.append('relative_paths[]', path);
+            }
+
+            function collectDirectoryEntry(entry, basePath) {
+                return new Promise(resolve => {
+                    if (!entry) {
+                        resolve([]);
+                        return;
+                    }
+
+                    if (entry.isFile) {
+                        entry.file(file => {
+                            resolve([{
+                                file,
+                                path: (basePath ? basePath + '/' : '') + file.name
+                            }]);
+                        }, () => resolve([]));
+                        return;
+                    }
+
+                    if (!entry.isDirectory) {
+                        resolve([]);
+                        return;
+                    }
+
+                    const reader = entry.createReader();
+                    const entries = [];
+
+                    function readBatch() {
+                        reader.readEntries(batch => {
+                            if (!batch.length) {
+                                Promise.all(entries.map(child => collectDirectoryEntry(child, (basePath ? basePath + '/' : '') + entry.name)))
+                                    .then(groups => resolve([].concat(...groups)));
+                                return;
+                            }
+
+                            entries.push(...batch);
+                            readBatch();
+                        }, () => resolve([]));
+                    }
+
+                    readBatch();
+                });
+            }
+
+            function collectDroppedUploadFiles(dataTransfer) {
+                const items = Array.from(dataTransfer && dataTransfer.items ? dataTransfer.items : []);
+
+                if (!items.length) {
+                    return Promise.resolve(Array.from(dataTransfer && dataTransfer.files ? dataTransfer.files : []).map(file => ({
+                        file,
+                        path: file.webkitRelativePath || file.name
+                    })));
+                }
+
+                const tasks = items.map(item => {
+                    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+                    if (entry) {
+                        return collectDirectoryEntry(entry, '');
+                    }
+
+                    const file = item.getAsFile ? item.getAsFile() : null;
+                    return Promise.resolve(file ? [{
+                        file,
+                        path: file.name
+                    }] : []);
+                });
+
+                return Promise.all(tasks).then(groups => [].concat(...groups));
+            }
+
+            function uploadDroppedFiles(uploadItems, folderId) {
+                if (projectFilesViewerOnly) {
+                    showFilesAlert('error', 'Upload is disabled for viewer access.');
+                    return;
+                }
+
+                const files = Array.from(uploadItems || []).filter(item => item && item.file);
+                const fundedId = $('#filesFundedId').val();
+
+                if (!fundedId || !files.length) {
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('action', 'upload');
+                formData.append('funded_id', fundedId);
+                formData.append('folder_id', folderId || '');
+
+                files.forEach(item => {
+                    addUploadFile(formData, item.file, item.path);
+                });
+
+                $('#filesFolderId').val(folderId || '');
+                updateFilesUploadTarget();
+                $('#filesAlert').hide();
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        $('#filesUploadProgressContainer').show();
+                        $('#filesUploadProgressBar').css('width', '0%');
+                        $('#filesUploadPercentText').text('0%');
+                        $('#filesUploadStats').text('0 MB / 0 MB');
+                        $('#filesUploadBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Uploading...');
+                    },
+                    xhr: function() {
+                        const xhr = new window.XMLHttpRequest();
+
+                        xhr.upload.addEventListener('progress', function(e) {
+                            if (!e.lengthComputable) return;
+
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
+                            const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+
+                            $('#filesUploadProgressBar').css('width', percent + '%');
+                            $('#filesUploadPercentText').text(percent >= 100 ? 'Processing...' : percent + '%');
+                            $('#filesUploadStats').text(`${loadedMB} MB / ${totalMB} MB`);
+                        });
+
+                        return xhr;
+                    },
+                    success: function(response) {
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Upload finished.');
+
+                        if (response.status === 'success') {
+                            finishFilesUploadProgress();
+                            loadFundedFiles(fundedId);
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseText ? xhr.responseText.replace(/<[^>]*>/g, '').trim() : 'Upload failed.';
+                        showFilesAlert('error', message || 'Upload failed.');
+                    },
+                    complete: function() {
+                        $('#filesUploadBtn').prop('disabled', false).html('<i class="fas fa-upload"></i> Upload');
+                    }
+                });
+            }
+
+            $('#fundedFilesExplorer').on('dragenter dragover', '.files-root-row, .files-folder-row', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $('.files-tree-row, #fundedFilesExplorer').removeClass('is-drag-over');
+                $(this).addClass('is-drag-over');
+            });
+
+            $('#fundedFilesExplorer').on('dragenter dragover', function(e) {
+                e.preventDefault();
+
+                if ($(e.target).closest('.files-root-row, .files-folder-row').length) {
+                    return;
+                }
+
+                $('.files-tree-row').removeClass('is-drag-over');
+                $(this).addClass('is-drag-over');
+            });
+
+            $('#fundedFilesExplorer').on('dragleave', '.files-root-row, .files-folder-row', function(e) {
+                e.preventDefault();
+                $(this).removeClass('is-drag-over');
+            });
+
+            $('#fundedFilesExplorer').on('dragleave', function(e) {
+                if (!this.contains(e.relatedTarget)) {
+                    $(this).removeClass('is-drag-over');
+                    $('.files-tree-row').removeClass('is-drag-over');
+                }
+            });
+
+            $('#fundedFilesExplorer').on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (projectFilesViewerOnly) {
+                    $('.files-tree-row, #fundedFilesExplorer').removeClass('is-drag-over');
+                    showFilesAlert('error', 'Upload is disabled for viewer access.');
+                    return;
+                }
+
+                const dropTarget = $(e.target).closest('.files-root-row, .files-folder-row');
+                const folderId = dropTarget.length ? (dropTarget.data('folder-id') || '') : '';
+                $('.files-tree-row, #fundedFilesExplorer').removeClass('is-drag-over');
+                collectDroppedUploadFiles(e.originalEvent.dataTransfer).then(files => {
+                    uploadDroppedFiles(files, folderId);
+                });
+            });
+
+            $('#fundedFilesForm').on('submit', function(e) {
+                e.preventDefault();
+
+                if (projectFilesViewerOnly) {
+                    showFilesAlert('error', 'Upload is disabled for viewer access.');
+                    return;
+                }
+
+                const fundedId = $('#filesFundedId').val();
+                const fileInput = $('#fundedFilesInput')[0];
+                const folderInput = $('#fundedFoldersInput')[0];
+                const hasFiles = (fileInput.files && fileInput.files.length > 0) || (folderInput.files && folderInput.files.length > 0);
+
+                if (!hasFiles) {
+                    showFilesAlert('error', 'Please choose at least one file.');
+                    return;
+                }
+
+                const formData = new FormData(this);
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        $('#filesAlert').hide();
+                        $('#filesUploadProgressContainer').show();
+                        $('#filesUploadProgressBar').css('width', '0%');
+                        $('#filesUploadPercentText').text('0%');
+                        $('#filesUploadStats').text('0 MB / 0 MB');
+                        $('#filesUploadBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Uploading...');
+                    },
+                    xhr: function() {
+                        const xhr = new window.XMLHttpRequest();
+
+                        xhr.upload.addEventListener('progress', function(e) {
+                            if (!e.lengthComputable) return;
+
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
+                            const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+
+                            $('#filesUploadProgressBar').css('width', percent + '%');
+                            $('#filesUploadPercentText').text(percent >= 100 ? 'Processing...' : percent + '%');
+                            $('#filesUploadStats').text(`${loadedMB} MB / ${totalMB} MB`);
+                        });
+
+                        return xhr;
+                    },
+                    success: function(response) {
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Upload finished.');
+
+                        if (response.status === 'success') {
+                            $('#fundedFilesInput').val('');
+                            $('#fundedFoldersInput').val('');
+                            finishFilesUploadProgress();
+                            loadFundedFiles(fundedId);
+                        }
+                    },
+                    error: function() {
+                        showFilesAlert('error', 'Upload failed.');
+                    },
+                    complete: function() {
+                        $('#filesUploadBtn').prop('disabled', false).html('<i class="fas fa-upload"></i> Upload');
+                    }
+                });
+            });
+
+            $('#fundedFilesExplorer').on('click', '.delete-file-btn', function() {
+                if (hasActiveCut()) {
+                    showCutFilesAlert();
+                    return;
+                }
+
+                if (!confirm('Delete this file?')) {
+                    return;
+                }
+
+                const attachmentId = $(this).data('id');
+                const fundedId = $('#filesFundedId').val();
+
+                $.ajax({
+                    url: 'funded_attachments.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'delete',
+                        id: attachmentId
+                    },
+                    success: function(response) {
+                        if (cutFile && String(cutFile.id) === String(attachmentId)) {
+                            clearActiveCut();
+                        }
+                        showFilesAlert(response.status === 'success' ? 'success' : 'error', response.message || 'Done.');
+                        loadFundedFiles(fundedId);
+                    },
+                    error: function() {
+                        showFilesAlert('error', 'Delete failed.');
+                    }
+                });
             });
 
             // Handle View button click
@@ -1727,7 +2852,14 @@ session_start();
 
 
 
-
+            // Style ng header
+            $('#your-table thead th').css({
+                'background-color': '#0a376e',
+                'color': '#ffffff',
+                'text-align': 'center',
+                'vertical-align': 'middle',
+                'font-weight': 'normal'
+            });
 
 
 

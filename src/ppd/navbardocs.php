@@ -137,7 +137,7 @@
             <div class="left-section">
                 <a href="#" class="navbar-brand">
                     <img src="images/mpw-icon.png" alt="MPW Logo" class="navbar-logo">
-                    PLANNING AND PROGRAMMING DIVISION PIMS | MPW-BARMM
+                    MINISTRY OF PUBLIC WORKS
                 </a>
             </div>
 

@@ -25,11 +25,11 @@ if ($_SESSION['role'] == 'outgoing') {
     exit;
 }
 if ($_SESSION['role'] == 'planning') {
-    header("Location: planningdocs.php");
+    header("Location: indexdocs_cside_funded2.php");
     exit;
 }
 if ($_SESSION['role'] == 'programming') {
-    header("Location: programmingdocs.php");
+    header("Location: indexdocs_cside_funded2.php");
     exit;
 }
 if ($_SESSION['role'] == 'environmental') {
@@ -37,7 +37,7 @@ if ($_SESSION['role'] == 'environmental') {
     exit;
 }
 if ($_SESSION['role'] == 'ebarmm') {
-    header("Location: ebarmmdocs.php");
+    header("Location: indexdocs_cside_fundedgis.php");
     exit;
 }
 
